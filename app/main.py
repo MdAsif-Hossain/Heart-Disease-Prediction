@@ -19,6 +19,7 @@ import joblib
 import numpy as np
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from app.schemas import HeartInput, HealthResponse, InfoResponse, PredictionOutput
 
@@ -121,6 +122,11 @@ def _get_pipeline():
 
 
 # ── Endpoints ──────────────────────────────────────────────────────────────────
+
+@app.get("/", include_in_schema=False)
+async def root():
+    return RedirectResponse(url="/docs")
+
 
 @app.get(
     "/health",
