@@ -1,13 +1,15 @@
-# Heart Disease Prediction API 🫀
+# Heart Disease Prediction API
 
-A production-ready REST API that predicts the **presence or absence of heart disease** from 13 clinical features, built with **FastAPI**, containerized with **Docker**, and deployed on **Render**.
+A REST API that predicts the presence or absence of heart disease from 13 clinical features, built with **FastAPI**, containerized with **Docker**, and deployed on **Render**.
 
-> Dataset: [UCI Heart Disease Dataset via Kaggle](https://www.kaggle.com/datasets/johnsmith88/heart-disease-dataset)  
-> Model: Logistic Regression with StandardScaler (scikit-learn Pipeline)
+- **Dataset:** [UCI Heart Disease Dataset via Kaggle (johnsmith88)](https://www.kaggle.com/datasets/johnsmith88/heart-disease-dataset)
+- **Model:** Logistic Regression with StandardScaler (scikit-learn Pipeline)
+- **Live URL:** https://heart-disease-prediction-2-dbhn.onrender.com
+- **Swagger UI:** https://heart-disease-prediction-2-dbhn.onrender.com/docs
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 .
@@ -17,23 +19,22 @@ A production-ready REST API that predicts the **presence or absence of heart dis
 │   └── schemas.py           # Pydantic request/response models
 ├── model/
 │   ├── train.py             # Model training script
-│   └── heart_model.joblib   # Saved trained model (generated)
+│   └── heart_model.joblib   # Saved trained model
 ├── data/
 │   └── heart.csv            # Dataset (download from Kaggle)
 ├── Dockerfile               # Multi-stage Docker build
 ├── docker-compose.yml       # Local development with Docker
-├── .dockerignore
-├── .gitignore
+├── render.yaml              # Render deployment blueprint
 ├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## ⚙️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+|-------|------------|
 | API Framework | FastAPI 0.115 |
 | ML Library | scikit-learn 1.6 |
 | Server | Uvicorn |
@@ -43,69 +44,22 @@ A production-ready REST API that predicts the **presence or absence of heart dis
 
 ---
 
-## 🚀 Quick Start
-
-### Option A — Run locally (without Docker)
-
-```powershell
-# 1. Clone the repo
-git clone https://github.com/YOUR_USERNAME/heart-disease-api.git
-cd heart-disease-api
-
-# 2. Create and activate a virtual environment
-python -m venv venv
-.\venv\Scripts\activate          # Windows
-# source venv/bin/activate       # macOS / Linux
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Download the dataset and place it at data/heart.csv
-#    https://www.kaggle.com/datasets/johnsmith88/heart-disease-dataset
-
-# 5. Train the model (generates model/heart_model.joblib)
-python model/train.py
-
-# 6. Start the API server
-uvicorn app.main:app --reload --port 8000
-```
-
-Open **http://localhost:8000/docs** in your browser → interactive Swagger UI.
-
----
-
-### Option B — Run with Docker Compose (recommended)
-
-```powershell
-# Build the Docker image
-docker-compose build
-
-# Start the container
-docker-compose up
-
-# Stop the container
-docker-compose down
-```
-
-Open **http://localhost:8000/docs** → Swagger UI loads automatically.
-
----
-
-## 📡 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/health` | Liveness check — confirms API is running |
-| `GET` | `/info` | Model metadata — type, features, version |
-| `POST` | `/predict` | Run a heart disease prediction |
+| `GET` | `/` | Redirects to Swagger UI |
+| `GET` | `/health` | Liveness check |
+| `GET` | `/info` | Model metadata |
+| `POST` | `/predict` | Run a prediction |
 
 ### GET `/health`
 
 ```bash
-curl http://localhost:8000/health
+curl https://heart-disease-prediction-2-dbhn.onrender.com/health
 ```
 
-**Response:**
+Response:
 ```json
 {
   "status": "healthy",
@@ -113,15 +67,13 @@ curl http://localhost:8000/health
 }
 ```
 
----
-
 ### GET `/info`
 
 ```bash
-curl http://localhost:8000/info
+curl https://heart-disease-prediction-2-dbhn.onrender.com/info
 ```
 
-**Response:**
+Response:
 ```json
 {
   "model_type": "LogisticRegression (with StandardScaler)",
@@ -133,31 +85,29 @@ curl http://localhost:8000/info
 }
 ```
 
----
-
 ### POST `/predict`
 
 **Input — 13 clinical features:**
 
-| Feature | Type | Description |
-|---------|------|-------------|
-| `age` | int | Age in years |
-| `sex` | int | 1 = male, 0 = female |
-| `cp` | int | Chest pain type (0–3) |
-| `trestbps` | int | Resting blood pressure (mm Hg) |
-| `chol` | int | Serum cholesterol (mg/dl) |
-| `fbs` | int | Fasting blood sugar > 120 mg/dl (1/0) |
-| `restecg` | int | Resting ECG results (0–2) |
-| `thalach` | int | Max heart rate achieved |
-| `exang` | int | Exercise-induced angina (1/0) |
-| `oldpeak` | float | ST depression by exercise |
-| `slope` | int | Peak exercise ST segment slope (0–2) |
-| `ca` | int | Major vessels colored by fluoroscopy (0–4) |
-| `thal` | int | Thalassemia type (0–3) |
+| Feature | Type | Range | Description |
+|---------|------|-------|-------------|
+| `age` | int | 1–120 | Age in years |
+| `sex` | int | 0–1 | 1 = male, 0 = female |
+| `cp` | int | 0–3 | Chest pain type |
+| `trestbps` | int | 50–250 | Resting blood pressure (mm Hg) |
+| `chol` | int | 100–600 | Serum cholesterol (mg/dl) |
+| `fbs` | int | 0–1 | Fasting blood sugar > 120 mg/dl |
+| `restecg` | int | 0–2 | Resting ECG results |
+| `thalach` | int | 60–250 | Max heart rate achieved |
+| `exang` | int | 0–1 | Exercise-induced angina |
+| `oldpeak` | float | 0.0–10.0 | ST depression by exercise |
+| `slope` | int | 0–2 | Peak exercise ST segment slope |
+| `ca` | int | 0–4 | Major vessels colored by fluoroscopy |
+| `thal` | int | 0–3 | Thalassemia type |
 
-**Example Request (curl):**
+**Example Request:**
 ```bash
-curl -X POST http://localhost:8000/predict \
+curl -X POST https://heart-disease-prediction-2-dbhn.onrender.com/predict \
   -H "Content-Type: application/json" \
   -d '{
     "age": 63, "sex": 1, "cp": 3, "trestbps": 145,
@@ -177,45 +127,86 @@ curl -X POST http://localhost:8000/predict \
 
 ---
 
-## 🐳 Docker Details
+## Run Locally with Docker
+
+```bash
+# Build the image
+docker-compose build
+
+# Start the container
+docker-compose up
+```
+
+Open **http://localhost:8000/docs** in your browser.
+
+To stop:
+```bash
+docker-compose down
+```
+
+---
+
+## Run Locally without Docker
+
+```bash
+# 1. Create and activate virtual environment
+python -m venv venv
+.\venv\Scripts\activate        # Windows
+# source venv/bin/activate     # macOS / Linux
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Download heart.csv from Kaggle and place it in data/
+
+# 4. Train the model
+python model/train.py
+
+# 5. Start the server
+uvicorn app.main:app --reload --port 8000
+```
+
+---
+
+## Docker Details
 
 The `Dockerfile` uses a **multi-stage build**:
-1. **Builder stage** — installs Python dependencies cleanly
-2. **Runtime stage** — lean image with only production files + a non-root user
+
+1. **Builder stage** — installs all Python dependencies into an isolated directory
+2. **Runtime stage** — copies only the installed packages and app code into a lean final image running as a non-root user
 
 This keeps the final image small and secure.
 
 ---
 
-## ☁️ Deployment on Render
+## Deployment on Render
+
+This project is deployed using Render's Docker environment via a `render.yaml` blueprint.
+
+Steps to redeploy on your own account:
 
 1. Push this repository to GitHub
-2. Log in to [Render](https://render.com)
-3. Click **New +** → **Web Service**
+2. Log in to [render.com](https://render.com)
+3. Click **New +** → **Blueprint**
 4. Connect your GitHub repo
-5. Set **Environment** → **Docker**
-6. Set **Branch** → `main`
-7. Click **Create Web Service**
-8. Wait for the build (~2–5 minutes)
-9. Your live URL will be: `https://YOUR_APP_NAME.onrender.com`
+5. Render reads `render.yaml` automatically and creates the service
+6. Wait ~3–5 minutes for the build to complete
 
-**Test the deployed API:**
-```bash
-curl https://YOUR_APP_NAME.onrender.com/health
-curl https://YOUR_APP_NAME.onrender.com/info
-```
-
-> ⚠️ Render's free tier spins down after 15 min of inactivity. The first request after a cold start may take ~30 seconds.
+> **Note:** Render's free tier spins down after 15 minutes of inactivity. The first request after a cold start may take ~30 seconds to respond.
 
 ---
 
-## 🔗 Live Deployment
+## Live Deployment
 
-**API URL:** `https://YOUR_APP_NAME.onrender.com`  
-**Swagger UI:** `https://YOUR_APP_NAME.onrender.com/docs`
+| | URL |
+|--|-----|
+| API Root | https://heart-disease-prediction-2-dbhn.onrender.com |
+| Swagger UI | https://heart-disease-prediction-2-dbhn.onrender.com/docs |
+| Health Check | https://heart-disease-prediction-2-dbhn.onrender.com/health |
+| Model Info | https://heart-disease-prediction-2-dbhn.onrender.com/info |
 
 ---
 
-## 📄 License
+## GitHub Repository
 
-MIT License — see [LICENSE](LICENSE) for details.
+https://github.com/MdAsif-Hossain/Heart-Disease-Prediction
