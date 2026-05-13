@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  heart-api:
+    # Build the image from the Dockerfile in the current directory
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # Give the running container a recognisable name
+    container_name: heart-disease-api
+
+    # Map host port 8000 → container port 8000
+    # Format: "HOST_PORT:CONTAINER_PORT"
+    ports:
+      - "8000:8000"
+
+    # Environment variables passed into the container
+    environment:
+      - PORT=8000
+      - PYTHONUNBUFFERED=1
+
+    # Restart the container automatically if it crashes
+    restart: unless-stopped
+
+    # Health check mirrors the HEALTHCHECK in the Dockerfile
+    # docker-compose will report the service as "healthy" once it passes
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
